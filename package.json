@@ -1,0 +1,11 @@
+{
+    "name": "filament-rich-editor-extender",
+    "type": "module",
+    "scripts": {
+        "build": "node bin/build.js"
+    },
+    "devDependencies": {
+        "@tiptap/core": "^3.20.0",
+        "esbuild": "^0.27.3"
+    }
+}
