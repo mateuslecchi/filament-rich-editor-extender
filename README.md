@@ -49,7 +49,76 @@ RichEditor::make('content')
     ]);
 ```
 
-Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default. Stored content is rendered to a responsive `<iframe>` automatically when you display it (e.g. via `RichContentRenderer`), so no extra work is needed on the front end.
+Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default.
+
+#### Saving
+
+Nothing special is required. Filament stores `RichEditor` content as a structured JSON document, so the YouTube node is persisted as data (the `<iframe>` is only generated at render time). Make sure the model column can hold that document — use a `json`/`longText` column and cast the attribute to `array`:
+
+```php
+protected function casts(): array
+{
+    return ['content' => 'array'];
+}
+```
+
+#### Displaying
+
+When you render stored content, the renderer needs to know about the plugin so it can turn the YouTube node back into an `<iframe>`. Filament's global editor configuration is not inherited by `RichContentRenderer`, so register the plugin on the content explicitly.
+
+The idiomatic way is via the model, using Filament's `HasRichContent`:
+
+```php
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
+
+class Post extends Model implements HasRichContent
+{
+    use InteractsWithRichContent;
+
+    protected function setUpRichContent(): void
+    {
+        $this->registerRichContent('content')
+            ->plugins([YoutubePlugin::make()]);
+    }
+}
+```
+
+```blade
+{!! $post->renderRichContent('content') !!}
+```
+
+Or render directly:
+
+```php
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
+
+RichContentRenderer::make($post->content)
+    ->plugins([YoutubePlugin::make()])
+    ->toHtml();
+```
+
+#### Sanitization
+
+Filament renders rich content through `Str::sanitizeHtml()`, whose sanitizer strips `<iframe>` by default — which would remove the embed. To prevent that, this package extends Filament's **application-wide** sanitizer config to allow a YouTube `<iframe>`, restricting its `src` to YouTube hosts (any other host's iframe `src` is dropped). Other media is unaffected.
+
+If you'd rather control this, publish the config and tweak it:
+
+```bash
+php artisan vendor:publish --tag=filament-rich-editor-extender-config
+```
+
+```php
+// config/filament-rich-editor-extender.php
+'youtube' => [
+    'sanitizer' => [
+        'enabled' => true, // set false to opt out of the global change
+        'allowed_hosts' => ['youtube-nocookie.com', 'youtube.com'],
+    ],
+],
+```
 
 ## Translations
 
