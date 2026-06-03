@@ -25,28 +25,44 @@ class Youtube extends Node
     public function addAttributes(): array
     {
         return [
+            // The node matches the wrapping `div[data-youtube-video]`, so the iframe
+            // attributes are recovered from the inner <iframe> when parsing HTML back
+            // into a node (HTML storage mode). In JSON storage the node is data and
+            // these closures are not used.
             'src' => [
                 'default' => null,
+                'parseHTML' => fn ($DOMNode): ?string => $this->iframeAttribute($DOMNode, 'src'),
             ],
             'start' => [
                 'default' => 0,
             ],
             'width' => [
                 'default' => $this->options['width'],
+                'parseHTML' => fn ($DOMNode): ?string => $this->iframeAttribute($DOMNode, 'width'),
             ],
             'height' => [
                 'default' => $this->options['height'],
+                'parseHTML' => fn ($DOMNode): ?string => $this->iframeAttribute($DOMNode, 'height'),
             ],
         ];
     }
 
     public function parseHTML(): array
     {
+        // tiptap-php's DOMParser only supports a single `tag` or `tag[attr]` selector
+        // (no descendant selectors), so we match the wrapper div, not the iframe.
         return [
             [
-                'tag' => 'div[data-youtube-video] iframe',
+                'tag' => 'div[data-youtube-video]',
             ],
         ];
+    }
+
+    protected function iframeAttribute(\DOMElement $DOMNode, string $attribute): ?string
+    {
+        $iframe = $DOMNode->getElementsByTagName('iframe')->item(0);
+
+        return $iframe?->getAttribute($attribute) ?: null;
     }
 
     public function renderHTML($node, $HTMLAttributes = []): array

@@ -2,6 +2,7 @@
 
 namespace MateusLecchi\FilamentRichEditorExtender;
 
+use Closure;
 use Filament\Forms\Components\RichEditor;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -42,7 +43,36 @@ class FilamentRichEditorExtenderServiceProvider extends PackageServiceProvider
             ]);
         });
 
+        static::registerStorageMacro();
+
         $this->allowYoutubeEmbedsInSanitizedHtml();
+    }
+
+    /**
+     * Opt-in, per-field storage mode helper. Lets a RichEditor field follow the
+     * package's configured default (`storage`) without forcing any mode globally:
+     *
+     *   RichEditor::make('content')->youtubeStorage()         // uses config default
+     *   RichEditor::make('content')->youtubeStorage('json')   // force JSON
+     *   RichEditor::make('content')->youtubeStorage('html')   // force HTML
+     *
+     * 'html' is Filament's native behavior, so we leave the field untouched (this
+     * also preserves any model-level `HasRichContent->json()` registration).
+     */
+    protected static function registerStorageMacro(): void
+    {
+        // Defined in a static context so the closure captures no `$this`; binding the
+        // scope to RichEditor lets `$this` resolve to the field (the macro is rebound
+        // to the instance by Filament's Macroable at call time).
+        RichEditor::macro('youtubeStorage', Closure::bind(
+            function (?string $mode = null): RichEditor {
+                $mode ??= config('filament-rich-editor-extender.storage', 'html');
+
+                return $mode === 'json' ? $this->json() : $this;
+            },
+            null,
+            RichEditor::class,
+        ));
     }
 
     /**

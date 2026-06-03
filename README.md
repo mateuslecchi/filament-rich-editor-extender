@@ -51,16 +51,36 @@ RichEditor::make('content')
 
 Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default.
 
-#### Saving
+#### Storage modes (HTML or JSON)
 
-Nothing special is required. Filament stores `RichEditor` content as a structured JSON document, so the YouTube node is persisted as data (the `<iframe>` is only generated at render time). Make sure the model column can hold that document — use a `json`/`longText` column and cast the attribute to `array`:
+Filament can store `RichEditor` content as **HTML** (its native default) or as a structured **JSON** document. The YouTube embed works in both — pick what fits your app:
+
+| | HTML (default) | JSON |
+|---|---|---|
+| Column | `text` / `longText`, **no cast** | `json`, or cast the attribute to `array` |
+| Field | `->youtubeStorage()` (or nothing) | `->youtubeStorage('json')` (or Filament's `->json()`) |
+| Stored value | ready-to-use HTML | structured document |
+
+Use the per-field helper to follow the package's configured default:
+
+```php
+use Filament\Forms\Components\RichEditor;
+
+RichEditor::make('content')
+    ->youtubeStorage()       // HTML by default; ->youtubeStorage('json') for JSON
+    ->toolbarButtons(['youtube']);
+```
+
+The default mode is read from `config('filament-rich-editor-extender.storage')` (`'html'` out of the box). The helper is **opt-in per field** — it never changes the storage mode of your other `RichEditor` fields. For JSON mode, remember to make the column array-castable:
 
 ```php
 protected function casts(): array
 {
-    return ['content' => 'array'];
+    return ['content' => 'array']; // JSON mode only
 }
 ```
+
+> ⚠️ Switching an existing field between HTML and JSON changes the stored format. Migrate the column/cast **and** the existing rows accordingly — the package does not convert data for you.
 
 #### Displaying
 

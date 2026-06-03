@@ -2,6 +2,27 @@
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Storage mode
+    |--------------------------------------------------------------------------
+    |
+    | Default storage mode applied by the `->youtubeStorage()` RichEditor helper
+    | when called without an argument:
+    |
+    |   'html' — Filament's native behavior. Content is stored as HTML. Use a
+    |            text/longText column WITHOUT an `array` cast.
+    |   'json' — Content is stored as a structured JSON document (more robust for
+    |            custom nodes). Requires a `json` column or an `array` cast.
+    |
+    | This is only applied to fields that call `->youtubeStorage()`. It never
+    | changes the storage mode of other RichEditors globally. When switching an
+    | existing field between modes, migrate the column/cast and existing rows.
+    |
+    */
+
+    'storage' => 'html',
+
     'youtube' => [
 
         /*
