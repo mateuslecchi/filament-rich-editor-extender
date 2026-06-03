@@ -21,10 +21,8 @@ const defaultOptions = {
     minify: true,
 }
 
-// Add an entry per JS extension as they are created, e.g.:
-//
-// compile({
-//     ...defaultOptions,
-//     entryPoints: ['./resources/js/filament/filament-rich-editor-extender/YourExtension.js'],
-//     outfile: './resources/js/dist/filament/filament-rich-editor-extender/YourExtension.js',
-// })
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/filament/filament-rich-editor-extender/Youtube.js'],
+    outfile: './resources/js/dist/filament/filament-rich-editor-extender/Youtube.js',
+})

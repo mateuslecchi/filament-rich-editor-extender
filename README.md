@@ -8,6 +8,7 @@
 Extra goodies for the Filament Forms RichEditor (v5). This package ships small, focused extensions that plug straight into your existing editor.
 
 ### Currently included:
+- YouTube embeds.
 - More to come...
 
 ## Requirements
@@ -34,7 +35,31 @@ php artisan filament-rich-editor-extender:install
 
 Once installed, all tools will be available for all RichEditor instances. The plugin registers itself automatically, so no additional configuration is required.
 
-> No extensions are bundled yet — more to come.
+### YouTube
+
+Add the `youtube` button to your editor's toolbar. It opens a modal asking for a YouTube URL and inserts the video as an embed.
+
+```php
+use Filament\Forms\Components\RichEditor;
+
+RichEditor::make('content')
+    ->label('Content')
+    ->toolbarButtons([
+        'youtube',
+    ]);
+```
+
+Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default. Stored content is rendered to a responsive `<iframe>` automatically when you display it (e.g. via `RichContentRenderer`), so no extra work is needed on the front end.
+
+## Translations
+
+The package ships with translations (currently `en` and `pt_BR`). To customize them in your app, publish the language files:
+
+```bash
+php artisan vendor:publish --tag=filament-rich-editor-extender-translations
+```
+
+They will be copied to `lang/vendor/filament-rich-editor-extender`. Contributions with new locales are welcome.
 
 ## Testing
 
