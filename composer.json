@@ -2,9 +2,13 @@
     "name": "mateuslecchi/filament-rich-editor-extender",
     "description": "A set of extra extensions for Filament RichEditor",
     "keywords": [
-        "MateusLecchi",
+        "filament",
+        "filament-plugin",
         "laravel",
-        "filament-rich-editor-extender"
+        "richeditor",
+        "rich-editor",
+        "tiptap",
+        "youtube"
     ],
     "homepage": "https://github.com/mateuslecchi/filament-rich-editor-extender",
     "license": "MIT",
@@ -15,6 +19,10 @@
             "role": "Developer"
         }
     ],
+    "support": {
+        "issues": "https://github.com/mateuslecchi/filament-rich-editor-extender/issues",
+        "source": "https://github.com/mateuslecchi/filament-rich-editor-extender"
+    },
     "require": {
         "php": "^8.4",
         "filament/forms": "^5.0",
@@ -69,6 +77,6 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
