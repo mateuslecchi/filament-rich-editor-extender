@@ -2,6 +2,24 @@
 
 All notable changes to `filament-rich-editor-extender` will be documented in this file.
 
+## v1.1.2 - 2026-06-09
+
+### Added
+
+- **Laravel Boost integration** — the package now ships AI agent guidelines at
+  `resources/boost/guidelines/core.blade.php`. When consuming apps use Laravel Boost, these are
+  picked up automatically (`php artisan boost:install`, or `php artisan boost:update --discover`), helping AI agents use the editor tools correctly: enabling the `youtube` /
+  `twitch` / `x` toolbar buttons, choosing a storage mode, registering the plugins when
+  displaying stored content, the Twitch `parent` requirement, and the iframe sanitizer hosts.
+
+### Documentation
+
+- README: new **"AI agents (Laravel Boost)"** section describing the bundled guidelines and
+  how to load them.
+
+Depois de publicar, confirme que o badge/versão no Packagist atualizou para v1.1.2 (pode levar
+um minuto).
+
 ## v1.0.0 - 2026-06-03
 
 - Initial release.
