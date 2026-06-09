@@ -52,6 +52,13 @@ class FilamentRichEditorExtenderServiceProvider extends PackageServiceProvider
         static::registerStorageMacro();
 
         $this->allowMediaEmbedsInSanitizedHtml();
+
+        // Optional front-end script that resizes displayed X (Twitter) embeds so
+        // tall posts are not cropped. Publish it and include it on pages that
+        // render rich content; the editor bundle handles this automatically.
+        $this->publishes([
+            __DIR__.'/../resources/js/dist/filament/filament-rich-editor-extender/XEmbed.js' => public_path('vendor/filament-rich-editor-extender/XEmbed.js'),
+        ], 'filament-rich-editor-extender-assets');
     }
 
     /**

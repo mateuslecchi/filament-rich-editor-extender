@@ -103,10 +103,14 @@ RichEditor::make('content')
 Posts are embedded via an `<iframe>` pointing at `platform.twitter.com`, so the
 embed survives sanitization and server-side rendering just like the other media.
 Both `x.com/.../status/<id>` and `twitter.com/.../status/<id>` URLs are accepted —
-the package extracts the post id and builds the embed URL for you. No `parent`
-domain or extra script is required. See
+the package extracts the post id and builds the embed URL for you. See
 [Displaying stored content](#displaying-stored-content) for how to register the
 `XPlugin` when rendering.
+
+> ℹ️ **Resizing.** An X post iframe has a fixed height, so tall posts (with images
+> or quotes) would be cropped. The editor resizes them automatically. On your
+> **front-end** pages, include the small resize script so displayed posts fit their
+> content — see [Resizing X embeds on the front-end](#resizing-x-embeds-on-the-front-end).
 
 ### Storage modes (HTML or JSON)
 
@@ -195,6 +199,29 @@ RichContentRenderer::make($post->content)
 > **Twitch only:** server-side rendered embeds use the `twitch.parent` config value
 > for their `parent` query parameter. Set it to the domain(s) where this content is
 > displayed, otherwise the Twitch player will refuse to load. See [Twitch](#twitch).
+
+### Resizing X embeds on the front-end
+
+X (Twitter) post iframes have a fixed height, so taller posts get cropped unless the
+iframe is resized to its content. **In the editor this happens automatically.** For
+your front-end pages, this package ships a tiny (~1 KB) script that listens for the
+height the X embed reports and resizes each post to fit.
+
+Publish it to your `public` directory:
+
+```bash
+php artisan vendor:publish --tag=filament-rich-editor-extender-assets
+```
+
+Then include it once on pages that display X embeds (e.g. in your layout):
+
+```blade
+<script src="{{ asset('vendor/filament-rich-editor-extender/XEmbed.js') }}" async></script>
+```
+
+The script is self-initializing and watches for embeds added to the page later, so it
+works with content loaded dynamically too. It only touches `platform.twitter.com`
+iframes; YouTube and Twitch embeds keep their configured dimensions and need nothing.
 
 ### Sanitization
 

@@ -98,6 +98,18 @@ Twitch embeds only load when their `parent` query parameter matches the domain s
 </code-snippet>
 @endverbatim
 
+### Resizing X (Twitter) embeds on the front-end
+
+X post iframes have a fixed height and would crop tall posts. The **editor resizes them automatically**. For **front-end pages** that display stored X embeds, publish and include the bundled resize script, otherwise posts may appear cut off:
+
+@verbatim
+<code-snippet name="Enable X embed resizing on the front-end" lang="blade">
+{{-- 1. php artisan vendor:publish --tag=filament-rich-editor-extender-assets --}}
+{{-- 2. Include once on pages that render X embeds (e.g. your layout): --}}
+<script src="{{ asset('vendor/filament-rich-editor-extender/XEmbed.js') }}" async></script>
+</code-snippet>
+@endverbatim
+
 ### Sanitization
 
 Filament's `Str::sanitizeHtml()` strips `<iframe>` by default. This package extends the application-wide sanitizer config to allow the embed iframe, restricting its `src` to a merged host allowlist (YouTube, Twitch, X). Any other host's iframe `src` is dropped. Each platform's `sanitizer.enabled` and `sanitizer.allowed_hosts` are configurable in `config/filament-rich-editor-extender.php`. X (`platform.twitter.com`) needs no extra script or `parent`.

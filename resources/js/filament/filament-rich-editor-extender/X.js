@@ -1,4 +1,10 @@
 import { Node, mergeAttributes, nodePasteRule } from '@tiptap/core'
+import { initXEmbedResizing } from './x-resize'
+
+// Keep the live editor preview from cropping tall posts: resize embeds as the
+// Tweet.html iframe reports its height. The MutationObserver inside picks up
+// embeds inserted into the editor after load.
+initXEmbedResizing()
 
 // Matches a tweet/post URL on either twitter.com or x.com and captures its id.
 export const X_REGEX = /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/[^/]+\/status\/(\d+)(\S*)?$/

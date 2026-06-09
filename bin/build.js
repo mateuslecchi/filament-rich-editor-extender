@@ -38,3 +38,9 @@ compile({
     entryPoints: ['./resources/js/filament/filament-rich-editor-extender/X.js'],
     outfile: './resources/js/dist/filament/filament-rich-editor-extender/X.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/filament/filament-rich-editor-extender/XEmbed.js'],
+    outfile: './resources/js/dist/filament/filament-rich-editor-extender/XEmbed.js',
+})
