@@ -10,6 +10,7 @@ Extra goodies for the Filament Forms RichEditor (v5). This package ships small, 
 ### Currently included:
 - YouTube embeds.
 - Twitch embeds (videos, clips and channels).
+- X (Twitter) post embeds.
 - More to come...
 
 ## Requirements
@@ -81,6 +82,26 @@ RichEditor::make('content')
 
 Displaying stored content and sanitization work exactly like YouTube — register
 the `TwitchPlugin` on the model/renderer the same way (see below).
+
+### X (Twitter)
+
+Add the `x` button to your editor's toolbar. It opens a modal asking for an X (or
+legacy Twitter) post URL and inserts the post as an embed.
+
+```php
+use Filament\Forms\Components\RichEditor;
+
+RichEditor::make('content')
+    ->label('Content')
+    ->toolbarButtons([
+        'x',
+    ]);
+```
+
+Posts are embedded via an `<iframe>` pointing at `platform.twitter.com`, so the
+embed survives sanitization and server-side rendering just like the other media.
+Both `x.com/.../status/<id>` and `twitter.com/.../status/<id>` URLs are accepted.
+Register the `XPlugin` on the model/renderer to display stored content (see below).
 
 #### Storage modes (HTML or JSON)
 

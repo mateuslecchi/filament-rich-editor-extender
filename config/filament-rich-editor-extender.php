@@ -102,4 +102,29 @@ return [
 
     ],
 
+    'x' => [
+
+        /*
+        |----------------------------------------------------------------------
+        | X (Twitter) embed sanitization
+        |----------------------------------------------------------------------
+        |
+        | X posts are embedded as an `<iframe>` pointing at X's embed endpoint.
+        | When `enabled` is true, the package keeps an iframe whose `src` host
+        | matches one of the hosts below through the application-wide sanitizer.
+        |
+        */
+
+        'sanitizer' => [
+
+            'enabled' => true,
+
+            'allowed_hosts' => [
+                'platform.twitter.com',
+            ],
+
+        ],
+
+    ],
+
 ];

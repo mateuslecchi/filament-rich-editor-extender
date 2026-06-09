@@ -32,3 +32,9 @@ compile({
     entryPoints: ['./resources/js/filament/filament-rich-editor-extender/Twitch.js'],
     outfile: './resources/js/dist/filament/filament-rich-editor-extender/Twitch.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/filament/filament-rich-editor-extender/X.js'],
+    outfile: './resources/js/dist/filament/filament-rich-editor-extender/X.js',
+})

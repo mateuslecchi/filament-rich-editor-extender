@@ -7,6 +7,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use MateusLecchi\FilamentRichEditorExtender\Plugins\TwitchPlugin;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\XPlugin;
 use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
 use MateusLecchi\FilamentRichEditorExtender\Sanitizers\IframeSrcHostSanitizer;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -37,12 +38,14 @@ class FilamentRichEditorExtenderServiceProvider extends PackageServiceProvider
         FilamentAsset::register([
             Js::make('filament-rich-editor-extender/youtube', __DIR__.'/../resources/js/dist/filament/filament-rich-editor-extender/Youtube.js')->loadedOnRequest(),
             Js::make('filament-rich-editor-extender/twitch', __DIR__.'/../resources/js/dist/filament/filament-rich-editor-extender/Twitch.js')->loadedOnRequest(),
+            Js::make('filament-rich-editor-extender/x', __DIR__.'/../resources/js/dist/filament/filament-rich-editor-extender/X.js')->loadedOnRequest(),
         ]);
 
         RichEditor::configureUsing(function (RichEditor $richEditor): void {
             $richEditor->plugins([
                 YoutubePlugin::make(),
                 TwitchPlugin::make(),
+                XPlugin::make(),
             ]);
         });
 
@@ -93,6 +96,7 @@ class FilamentRichEditorExtenderServiceProvider extends PackageServiceProvider
         $platforms = [
             ['youtube', 'data-youtube-video', ['youtube-nocookie.com', 'youtube.com']],
             ['twitch', 'data-twitch-video', ['player.twitch.tv', 'clips.twitch.tv']],
+            ['x', 'data-x-post', ['platform.twitter.com']],
         ];
 
         $allowedHosts = [];
