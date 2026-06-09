@@ -231,6 +231,25 @@ php artisan vendor:publish --tag=filament-rich-editor-extender-config
 ],
 ```
 
+## AI agents (Laravel Boost)
+
+This package ships [Laravel Boost](https://laravel.com/docs/boost) guidelines so AI
+coding agents know how to use it correctly — adding the toolbar buttons, choosing a
+storage mode, registering the plugins when displaying content, the Twitch `parent`
+requirement and the sanitizer hosts.
+
+If your app uses Laravel Boost, the guidelines are picked up automatically. To pull
+them in (or refresh them after installing this package), run:
+
+```bash
+php artisan boost:install
+# or, to scan for newly installed packages:
+php artisan boost:update --discover
+```
+
+The guidelines live at `resources/boost/guidelines/core.blade.php` in this package —
+no configuration is required on your side.
+
 ## Translations
 
 The package ships with translations (currently `en` and `pt_BR`). To customize them in your app, publish the language files:
