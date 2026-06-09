@@ -17,6 +17,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: 1.x
+          # Full history so the CHANGELOG commit can be fast-forwarded onto dev.
+          fetch-depth: 0
 
       - name: Update Changelog
         uses: stefanzweifel/changelog-updater-action@v1
@@ -30,3 +32,15 @@ jobs:
           branch: 1.x
           commit_message: Update CHANGELOG
           file_pattern: CHANGELOG.md
+
+      # The CHANGELOG commit lands on 1.x only, leaving dev behind. Since a release
+      # is cut from `dev` (pushed to 1.x), dev is the parent of this commit, so we
+      # can fast-forward dev to keep both branches in sync. If dev has since moved
+      # on, we just warn instead of failing the release.
+      - name: Sync CHANGELOG commit back to dev
+        run: |
+          if git push origin HEAD:dev; then
+            echo "dev fast-forwarded to include the CHANGELOG commit."
+          else
+            echo "::warning::Could not fast-forward dev (it has diverged from 1.x). Run 'git merge origin/1.x' on dev manually."
+          fi
