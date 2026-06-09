@@ -26,3 +26,9 @@ compile({
     entryPoints: ['./resources/js/filament/filament-rich-editor-extender/Youtube.js'],
     outfile: './resources/js/dist/filament/filament-rich-editor-extender/Youtube.js',
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/filament/filament-rich-editor-extender/Twitch.js'],
+    outfile: './resources/js/dist/filament/filament-rich-editor-extender/Twitch.js',
+})

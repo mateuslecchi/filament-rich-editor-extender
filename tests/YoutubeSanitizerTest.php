@@ -2,7 +2,7 @@
 
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
-use MateusLecchi\FilamentRichEditorExtender\Sanitizers\YoutubeIframeAttributeSanitizer;
+use MateusLecchi\FilamentRichEditorExtender\Sanitizers\IframeSrcHostSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
@@ -64,7 +64,7 @@ it('preserves the YouTube node through a JSON document round-trip', function () 
 });
 
 it('honours a custom allowed-hosts list', function () {
-    $sanitizer = new YoutubeIframeAttributeSanitizer(['vimeo.com']);
+    $sanitizer = new IframeSrcHostSanitizer(['vimeo.com']);
     $config = new HtmlSanitizerConfig;
 
     expect($sanitizer->sanitizeAttribute('iframe', 'src', 'https://player.vimeo.com/video/1', $config))

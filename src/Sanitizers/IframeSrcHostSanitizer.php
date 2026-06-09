@@ -6,25 +6,27 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitizerInterface;
 
 /**
- * Restricts the `src` of `<iframe>` elements to YouTube hosts.
+ * Restricts the `src` of `<iframe>` elements to an allowlist of hosts.
  *
  * Filament's `RichContentRenderer::toHtml()` runs every node's HTML through
  * Symfony's `HtmlSanitizer`, whose `allowSafeElements()` list does not include
- * `<iframe>`. We allow the element globally (see the service provider) so the
- * YouTube embed survives, and this sanitizer narrows the only meaningful attack
- * surface back down: a non-YouTube `src` is dropped, leaving a harmless empty
- * iframe. Image/media hosts are left untouched, so other media keeps working.
+ * `<iframe>`. We allow the element globally (see the service provider) so media
+ * embeds (YouTube, Twitch, X, …) survive, and this sanitizer narrows the only
+ * meaningful attack surface back down: an iframe whose `src` host is not on the
+ * allowlist has its `src` dropped, leaving a harmless empty iframe.
+ *
+ * Filament binds a single shared `HtmlSanitizerConfig`, and chaining several
+ * host-allowlist sanitizers for the same element/attribute would conflict (one
+ * would drop a host another just allowed). So a single instance must carry the
+ * union of every enabled plugin's hosts.
  */
-class YoutubeIframeAttributeSanitizer implements AttributeSanitizerInterface
+class IframeSrcHostSanitizer implements AttributeSanitizerInterface
 {
     /**
      * @param  array<string>  $allowedHostSuffixes
      */
     public function __construct(
-        protected array $allowedHostSuffixes = [
-            'youtube-nocookie.com',
-            'youtube.com',
-        ],
+        protected array $allowedHostSuffixes = [],
     ) {}
 
     /**

@@ -9,6 +9,7 @@ Extra goodies for the Filament Forms RichEditor (v5). This package ships small, 
 
 ### Currently included:
 - YouTube embeds.
+- Twitch embeds (videos, clips and channels).
 - More to come...
 
 ## Requirements
@@ -50,6 +51,36 @@ RichEditor::make('content')
 ```
 
 Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default.
+
+### Twitch
+
+Add the `twitch` button to your editor's toolbar. It opens a modal asking for a Twitch URL (video, clip or channel) and inserts it as an embed.
+
+```php
+use Filament\Forms\Components\RichEditor;
+
+RichEditor::make('content')
+    ->label('Content')
+    ->toolbarButtons([
+        'twitch',
+    ]);
+```
+
+> ⚠️ **Twitch requires a `parent` domain.** Every Twitch embed must declare the
+> domain(s) it is served from, or the player refuses to load. Publish the config
+> and set `twitch.parent` to the domain(s) where your *rendered* content is shown
+> (no scheme, no path). The live editor preview derives its parent from the current
+> host automatically — this setting only applies to server-side rendered embeds.
+
+```php
+// config/filament-rich-editor-extender.php
+'twitch' => [
+    'parent' => ['example.com', 'www.example.com'],
+],
+```
+
+Displaying stored content and sanitization work exactly like YouTube — register
+the `TwitchPlugin` on the model/renderer the same way (see below).
 
 #### Storage modes (HTML or JSON)
 

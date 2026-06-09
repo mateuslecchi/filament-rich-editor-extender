@@ -58,4 +58,48 @@ return [
 
     ],
 
+    'twitch' => [
+
+        /*
+        |----------------------------------------------------------------------
+        | Twitch embed parent domain(s)
+        |----------------------------------------------------------------------
+        |
+        | Twitch requires every embed to declare the domain(s) it is served
+        | from via a `parent` query parameter, otherwise the player refuses to
+        | load. Set this to the domain(s) where your *rendered* content is
+        | displayed (no scheme, no path), e.g. ['example.com', 'www.example.com'].
+        | 'localhost' only works during local development.
+        |
+        | The live editor preview derives its own parent from the current host
+        | automatically; this value only applies to server-side rendered embeds.
+        |
+        */
+
+        'parent' => ['localhost'],
+
+        /*
+        |----------------------------------------------------------------------
+        | Twitch embed sanitization
+        |----------------------------------------------------------------------
+        |
+        | Like YouTube, Twitch embeds render as an `<iframe>`. When `enabled`
+        | is true, the package keeps an iframe whose `src` host matches one of
+        | the hosts below through the application-wide sanitizer.
+        |
+        */
+
+        'sanitizer' => [
+
+            'enabled' => true,
+
+            'allowed_hosts' => [
+                'player.twitch.tv',
+                'clips.twitch.tv',
+            ],
+
+        ],
+
+    ],
+
 ];

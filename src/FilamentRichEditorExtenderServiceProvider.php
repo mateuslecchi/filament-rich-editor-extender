@@ -6,8 +6,9 @@ use Closure;
 use Filament\Forms\Components\RichEditor;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\TwitchPlugin;
 use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
-use MateusLecchi\FilamentRichEditorExtender\Sanitizers\YoutubeIframeAttributeSanitizer;
+use MateusLecchi\FilamentRichEditorExtender\Sanitizers\IframeSrcHostSanitizer;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -35,17 +36,19 @@ class FilamentRichEditorExtenderServiceProvider extends PackageServiceProvider
     {
         FilamentAsset::register([
             Js::make('filament-rich-editor-extender/youtube', __DIR__.'/../resources/js/dist/filament/filament-rich-editor-extender/Youtube.js')->loadedOnRequest(),
+            Js::make('filament-rich-editor-extender/twitch', __DIR__.'/../resources/js/dist/filament/filament-rich-editor-extender/Twitch.js')->loadedOnRequest(),
         ]);
 
         RichEditor::configureUsing(function (RichEditor $richEditor): void {
             $richEditor->plugins([
                 YoutubePlugin::make(),
+                TwitchPlugin::make(),
             ]);
         });
 
         static::registerStorageMacro();
 
-        $this->allowYoutubeEmbedsInSanitizedHtml();
+        $this->allowMediaEmbedsInSanitizedHtml();
     }
 
     /**
@@ -78,38 +81,64 @@ class FilamentRichEditorExtenderServiceProvider extends PackageServiceProvider
     /**
      * Filament renders rich content through `Str::sanitizeHtml()`, whose Symfony
      * `HtmlSanitizerConfig` only allows "safe" elements — and `<iframe>` is not one
-     * of them, so YouTube embeds get stripped on display. When enabled, we extend the
-     * bound config to allow the YouTube `<iframe>` (with the `src` restricted to the
-     * configured hosts by a dedicated attribute sanitizer) and the `data-youtube-video`
-     * wrapper attribute. This affects the application-wide sanitizer; see the config file.
+     * of them, so media embeds (YouTube, Twitch, …) get stripped on display. When
+     * enabled, we extend the bound config to allow the embed `<iframe>` (with the
+     * `src` restricted to the configured hosts by a single attribute sanitizer that
+     * carries the union of every enabled platform's hosts) and each platform's
+     * wrapper attribute. This affects the application-wide sanitizer; see the config.
      */
-    protected function allowYoutubeEmbedsInSanitizedHtml(): void
+    protected function allowMediaEmbedsInSanitizedHtml(): void
     {
-        if (! config('filament-rich-editor-extender.youtube.sanitizer.enabled', true)) {
+        // [config prefix, wrapper data attribute, default allowed hosts]
+        $platforms = [
+            ['youtube', 'data-youtube-video', ['youtube-nocookie.com', 'youtube.com']],
+            ['twitch', 'data-twitch-video', ['player.twitch.tv', 'clips.twitch.tv']],
+        ];
+
+        $allowedHosts = [];
+        $wrapperAttributes = [];
+
+        foreach ($platforms as [$prefix, $wrapperAttribute, $defaultHosts]) {
+            if (! config("filament-rich-editor-extender.{$prefix}.sanitizer.enabled", true)) {
+                continue;
+            }
+
+            $allowedHosts = array_merge(
+                $allowedHosts,
+                config("filament-rich-editor-extender.{$prefix}.sanitizer.allowed_hosts", $defaultHosts),
+            );
+
+            $wrapperAttributes[] = $wrapperAttribute;
+        }
+
+        if ($allowedHosts === []) {
             return;
         }
 
-        $allowedHosts = config('filament-rich-editor-extender.youtube.sanitizer.allowed_hosts', [
-            'youtube-nocookie.com',
-            'youtube.com',
-        ]);
-
         $this->app->extend(
             HtmlSanitizerConfig::class,
-            fn (HtmlSanitizerConfig $config): HtmlSanitizerConfig => $config
-                ->allowElement('iframe', [
-                    'src',
-                    'width',
-                    'height',
-                    'allow',
-                    'allowfullscreen',
-                    'frameborder',
-                    'referrerpolicy',
-                    'title',
-                    'loading',
-                ])
-                ->allowAttribute('data-youtube-video', allowedElements: '*')
-                ->withAttributeSanitizer(new YoutubeIframeAttributeSanitizer($allowedHosts)),
+            function (HtmlSanitizerConfig $config) use ($allowedHosts, $wrapperAttributes): HtmlSanitizerConfig {
+                $config = $config
+                    ->allowElement('iframe', [
+                        'src',
+                        'width',
+                        'height',
+                        'allow',
+                        'allowfullscreen',
+                        'frameborder',
+                        'scrolling',
+                        'referrerpolicy',
+                        'title',
+                        'loading',
+                    ])
+                    ->withAttributeSanitizer(new IframeSrcHostSanitizer(array_values(array_unique($allowedHosts))));
+
+                foreach ($wrapperAttributes as $wrapperAttribute) {
+                    $config = $config->allowAttribute($wrapperAttribute, allowedElements: '*');
+                }
+
+                return $config;
+            },
         );
     }
 }
