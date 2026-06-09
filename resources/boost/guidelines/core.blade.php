@@ -81,7 +81,9 @@ RichContentRenderer::make($post->content)
 </code-snippet>
 @endverbatim
 
+@verbatim
 In Blade, output rendered model content with `{!! $post->renderRichContent('content') !!}`.
+@endverbatim
 
 ### Twitch requires a `parent` domain
 
