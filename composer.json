@@ -25,9 +25,10 @@
     },
     "require": {
         "php": "^8.4",
-        "filament/forms": "^5.0",
+        "filament/forms": "^5.6",
         "illuminate/contracts": "^13.0",
         "spatie/laravel-package-tools": "^1.92",
+        "symfony/html-sanitizer": "^8.0",
         "ueberdosis/tiptap-php": "^2.0"
     },
     "require-dev": {

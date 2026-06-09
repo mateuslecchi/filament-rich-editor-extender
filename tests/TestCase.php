@@ -22,17 +22,19 @@ class TestCase extends Orchestra
 
     protected function getPackageProviders($app)
     {
-        return [
+        return array_values(array_filter([
             BladeIconsServiceProvider::class,
             BladeHeroiconsServiceProvider::class,
-            BladeCaptureDirectiveServiceProvider::class,
+            // Only a transitive (and version-dependent) Filament dependency: it is
+            // absent under `--prefer-lowest`, so register it solely when present.
+            class_exists(BladeCaptureDirectiveServiceProvider::class) ? BladeCaptureDirectiveServiceProvider::class : null,
             LivewireServiceProvider::class,
             SupportServiceProvider::class,
             ActionsServiceProvider::class,
             SchemasServiceProvider::class,
             FormsServiceProvider::class,
             FilamentRichEditorExtenderServiceProvider::class,
-        ];
+        ]));
     }
 
     public function getEnvironmentSetUp($app) {}

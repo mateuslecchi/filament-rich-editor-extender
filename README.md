@@ -17,7 +17,7 @@ Extra goodies for the Filament Forms RichEditor (v5). This package ships small, 
 
 | Package Version | PHP Version | Laravel Version | Filament Forms Version |
 |:---------------:|:-----------:|:---------------:|:----------------------:|
-|       1.x       |    8.4+     |       13+       |          5.x           |
+|       1.x       |    8.4+     |       13+       |         5.6+           |
 
 ## Installation
 
