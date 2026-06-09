@@ -51,7 +51,9 @@ RichEditor::make('content')
     ]);
 ```
 
-Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default.
+Embeds use the privacy-enhanced `youtube-nocookie.com` domain by default. See
+[Displaying stored content](#displaying-stored-content) for how to register the
+`YoutubePlugin` when rendering, and [Sanitization](#sanitization) for the host allowlist.
 
 ### Twitch
 
@@ -80,8 +82,8 @@ RichEditor::make('content')
 ],
 ```
 
-Displaying stored content and sanitization work exactly like YouTube — register
-the `TwitchPlugin` on the model/renderer the same way (see below).
+See [Displaying stored content](#displaying-stored-content) for how to register the
+`TwitchPlugin` when rendering, and [Sanitization](#sanitization) for the host allowlist.
 
 ### X (Twitter)
 
@@ -100,12 +102,15 @@ RichEditor::make('content')
 
 Posts are embedded via an `<iframe>` pointing at `platform.twitter.com`, so the
 embed survives sanitization and server-side rendering just like the other media.
-Both `x.com/.../status/<id>` and `twitter.com/.../status/<id>` URLs are accepted.
-Register the `XPlugin` on the model/renderer to display stored content (see below).
+Both `x.com/.../status/<id>` and `twitter.com/.../status/<id>` URLs are accepted —
+the package extracts the post id and builds the embed URL for you. No `parent`
+domain or extra script is required. See
+[Displaying stored content](#displaying-stored-content) for how to register the
+`XPlugin` when rendering.
 
-#### Storage modes (HTML or JSON)
+### Storage modes (HTML or JSON)
 
-Filament can store `RichEditor` content as **HTML** (its native default) or as a structured **JSON** document. The YouTube embed works in both — pick what fits your app:
+Filament can store `RichEditor` content as **HTML** (its native default) or as a structured **JSON** document. **Every embed in this package works in both** — pick what fits your app:
 
 | | HTML (default) | JSON |
 |---|---|---|
@@ -120,8 +125,11 @@ use Filament\Forms\Components\RichEditor;
 
 RichEditor::make('content')
     ->youtubeStorage()       // HTML by default; ->youtubeStorage('json') for JSON
-    ->toolbarButtons(['youtube']);
+    ->toolbarButtons(['youtube', 'twitch', 'x']);
 ```
+
+> The `->youtubeStorage()` helper toggles the **field's** storage mode (HTML vs JSON);
+> it is not YouTube-specific and applies regardless of which embeds the field uses.
 
 The default mode is read from `config('filament-rich-editor-extender.storage')` (`'html'` out of the box). The helper is **opt-in per field** — it never changes the storage mode of your other `RichEditor` fields. For JSON mode, remember to make the column array-castable:
 
@@ -134,15 +142,17 @@ protected function casts(): array
 
 > ⚠️ Switching an existing field between HTML and JSON changes the stored format. Migrate the column/cast **and** the existing rows accordingly — the package does not convert data for you.
 
-#### Displaying
+### Displaying stored content
 
-When you render stored content, the renderer needs to know about the plugin so it can turn the YouTube node back into an `<iframe>`. Filament's global editor configuration is not inherited by `RichContentRenderer`, so register the plugin on the content explicitly.
+When you render stored content, the renderer needs to know about each plugin so it can turn the stored node back into an `<iframe>`. Filament's global editor configuration is **not** inherited by `RichContentRenderer`, so register the plugins you use on the content explicitly.
 
-The idiomatic way is via the model, using Filament's `HasRichContent`:
+The idiomatic way is via the model, using Filament's `HasRichContent`. Register only the plugins whose embeds your content can contain:
 
 ```php
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\TwitchPlugin;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\XPlugin;
 use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
 
 class Post extends Model implements HasRichContent
@@ -152,7 +162,11 @@ class Post extends Model implements HasRichContent
     protected function setUpRichContent(): void
     {
         $this->registerRichContent('content')
-            ->plugins([YoutubePlugin::make()]);
+            ->plugins([
+                YoutubePlugin::make(),
+                TwitchPlugin::make(),
+                XPlugin::make(),
+            ]);
     }
 }
 ```
@@ -165,18 +179,28 @@ Or render directly:
 
 ```php
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\TwitchPlugin;
+use MateusLecchi\FilamentRichEditorExtender\Plugins\XPlugin;
 use MateusLecchi\FilamentRichEditorExtender\Plugins\YoutubePlugin;
 
 RichContentRenderer::make($post->content)
-    ->plugins([YoutubePlugin::make()])
+    ->plugins([
+        YoutubePlugin::make(),
+        TwitchPlugin::make(),
+        XPlugin::make(),
+    ])
     ->toHtml();
 ```
 
-#### Sanitization
+> **Twitch only:** server-side rendered embeds use the `twitch.parent` config value
+> for their `parent` query parameter. Set it to the domain(s) where this content is
+> displayed, otherwise the Twitch player will refuse to load. See [Twitch](#twitch).
 
-Filament renders rich content through `Str::sanitizeHtml()`, whose sanitizer strips `<iframe>` by default — which would remove the embed. To prevent that, this package extends Filament's **application-wide** sanitizer config to allow a YouTube `<iframe>`, restricting its `src` to YouTube hosts (any other host's iframe `src` is dropped). Other media is unaffected.
+### Sanitization
 
-If you'd rather control this, publish the config and tweak it:
+Filament renders rich content through `Str::sanitizeHtml()`, whose sanitizer strips `<iframe>` by default — which would remove every embed. To prevent that, this package extends Filament's **application-wide** sanitizer config to allow the embed `<iframe>`, restricting its `src` to a host allowlist (any other host's iframe `src` is dropped, leaving a harmless empty iframe). Other media is unaffected.
+
+Each platform contributes its own hosts, and the allowlists are merged into a single sanitizer. You can toggle or customize each one. Publish the config to control it:
 
 ```bash
 php artisan vendor:publish --tag=filament-rich-editor-extender-config
@@ -188,6 +212,21 @@ php artisan vendor:publish --tag=filament-rich-editor-extender-config
     'sanitizer' => [
         'enabled' => true, // set false to opt out of the global change
         'allowed_hosts' => ['youtube-nocookie.com', 'youtube.com'],
+    ],
+],
+
+'twitch' => [
+    'parent' => ['example.com'], // domain(s) serving your rendered embeds
+    'sanitizer' => [
+        'enabled' => true,
+        'allowed_hosts' => ['player.twitch.tv', 'clips.twitch.tv'],
+    ],
+],
+
+'x' => [
+    'sanitizer' => [
+        'enabled' => true,
+        'allowed_hosts' => ['platform.twitter.com'],
     ],
 ],
 ```
