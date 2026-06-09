@@ -2,6 +2,14 @@
 
 All notable changes to `filament-rich-editor-extender` will be documented in this file.
 
+## v1.1.3 - 2026-06-09
+
+### Fixed
+
+- **Laravel Boost guidelines** — escaped a Blade echo (`{!! $post->renderRichContent('content') !!}`) in `resources/boost/guidelines/core.blade.php` that
+  Boost evaluated as real Blade, causing an "undefined `$post`" error during `boost:install`.
+  The snippet is now wrapped in `@verbatim` and renders as literal text.
+
 ## v1.1.2 - 2026-06-09
 
 ### Added
